@@ -39,13 +39,8 @@ Each bit controls a hardware feature.
 ## Important Bit Operations
 
 ### 1️⃣ Set a Bit
-```c
 reg |= (1 << pos);
-
 ### 1️⃣ Set a Bit
-```c
-### 2️⃣ Clear a Bit
-```c
 reg &= ~(1 << pos);
 ### 3️⃣ Toggle a Bit
 ```c
