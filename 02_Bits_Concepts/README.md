@@ -40,10 +40,9 @@ Each bit controls a hardware feature.
 
 ### 1️⃣ Set a Bit
 reg |= (1 << pos);
-### 1️⃣ Set a Bit
+### 1️⃣ Clear a Bit
 reg &= ~(1 << pos);
 ### 3️⃣ Toggle a Bit
-```c
 reg ^= (1 << pos);
 
 ## Real Embedded Example
