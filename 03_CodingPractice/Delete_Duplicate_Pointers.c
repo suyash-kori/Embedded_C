@@ -1,22 +1,26 @@
 #include <stdio.h>
 
-int removeDuplecate(int* arr, int size) {
-    if (size == 0) return 0;
+int removeDuplecate(int *arr, int n) {
+    int *p, *q, *end;
 
-    int uniqueIndex = 0;
-
-    for (int i = 1; i < size; i++) {
-        if (arr[i] != arr[uniqueIndex]) {
-            uniqueIndex++;
-            arr[uniqueIndex] = arr[i];
+    for(p = arr; p < arr + n; p++) {
+        for(q = p + 1; q < arr + n; q++) {
+            if(*p == *q) {
+                end = q;
+                while(end < arr + n - 1) {
+                    *end = *(end + 1);
+                    end++;
+                }
+                n--; // Decrease the size of the array
+                q--; // Move back the pointer to check the new value at this position
+            }
         }
     }
-
-    return uniqueIndex + 1; // Return the new size of the array
+    return n;
 }
 
 int main() {
-    int arr[] = {1, 1, 2, 3, 3, 4, 5, 5};
+    int arr[] = {1, 6, 2, 3, 3, 1, 5, 5};
     int size = sizeof(arr) / sizeof(arr[0]);
 
     int newSize = removeDuplecate(arr, size);
