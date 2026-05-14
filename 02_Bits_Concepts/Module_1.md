@@ -7,15 +7,15 @@ Every embedded/firmware question, registers/protocols/memory has binary at its r
 ## 1) Number Systems at a Glance
 
 Base     Name       Digits           Example
------------------------------------------------
+
 2       Binary       0,1             0b1101
------------------------------------------------
+
 8       Octal        0-7             015
------------------------------------------------
+
 10      Decimal      0-9             13
------------------------------------------------
+
 16      Hex          0-9,A-F         0x0D
------------------------------------------------
+
 
 All four represent the same number 13 above. In C, prefix 
 0b = binary
@@ -25,7 +25,7 @@ Octal is a classic trap - int x = 013 is 11, not 13!
 Confirmation:- 1*(8^1) + 3*(8^0)
              = 8 + 3
              = 11
-----------------------------------------------
+
 So Octal of 13 is->>
 
          8 | 13
@@ -61,13 +61,13 @@ Why 2's complement and not just a sign bit?
 No separate subtraction circuit needed. Elegant
 
 ## 3) Signed vs Unsigned - Ranges
-----------------------------------------------------------
+
 Type          8-bit range       32-bit range
-----------------------------------------------------------
+
 Unsigned       0 to 255       0 to 4,294,967,295
-----------------------------------------------------------
+
 Signed       -128 to 127   -2,147,483,648 to 2,147,483,647
-----------------------------------------------------------
+
 Notice: one more negative than positive. Because zero takes a slot on the positive side. This is why INT_MIN has no positive equivalent, -INT_MIN overflows!
 
 ## 4) Endianness - Critical in Embedded
@@ -85,23 +85,23 @@ You read a 32-bit sensor register over SPI and get garbage. Endianness mismatch 
 Always use ntohl()/htonl() when crossing network <-> host boundaries.
 
 ## Q&A - Test Yourself
---------------------------------------------------------------------------
+
 Q1- TRICKY: What is int x = 0x8000 0000 for a 32-bit signed int? What is -x?
 Ans: - 
 0x8000 0000 = INT_MIN
             = i.e -2,147,483,648.
 And -x = -(INT_MIN) is undefined behaviour in C, the positive equivalent doesn't exist in 32-bit signed range.In practice it wraps back to INT_MIN itself on most hardware.
---------------------------------------------------------------------------
+
 Q2- CONCEPT: How many bytes does 0xDEADBEEF occupy, and what is it in decimal?
 Ans: - 
 4 bytes(32 bits). Decimal = 3,735,928,559.
 Commonly used as a magic number/memory poison value in embedded debugging to mark uninitialized memory.
----------------------------------------------------------------------------
+
 Q3- INTERVIEW: A firmware engineer reads a 16-bit value 0x0102 from a big-endian sensor on a little-endian MCU. What value does the MCU interpret it as without conversion?
 Ans: -
 The MCU reads bytes as [02][01] -> interprets as 0x0201 = 513 instead of the correct 258. Always byte swap when crossing endian boundaries.
 Use -> __builtin_bswap16(val) in GCC.
----------------------------------------------------------------------------
+
 Q4- CLASSIC: Without running it, what does this print?
 
 int x = -1;
@@ -110,7 +110,7 @@ printf("%u", y);
 Ans: -
 4294967295(=2^32 - 1 = 0xFFFF FFFF)
 Signed -1 in 2's complement is all 1s. Reinterpreted as unsigned, that's the max unsigned value. This implicit conversion is a very common bug in Embedded C.
----------------------------------------------------------------------------
+
 
 ## Module 1 Summary
 - Binary, Octal, Decimal, Hex - same value, different representations
