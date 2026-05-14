@@ -6,15 +6,15 @@ Every embedded/firmware question, registers/protocols/memory has binary at its r
 
 ## 1) Number Systems at a Glance
 
-Base     Name       Digits           Example
+Base&emsp;Name&emsp;Digits&emsp;Example
 
-2       Binary       0,1             0b1101
+2&emsp;Binary&emsp;0,1&emsp;0b1101
 
-8       Octal        0-7             015
+8&emsp;Octal&emsp;0-7&emsp;015
 
-10      Decimal      0-9             13
+10&emsp;Decimal&emsp;0-9&emsp;13
 
-16      Hex          0-9,A-F         0x0D
+16&emsp;Hex&emsp;0-9,A-F&emsp;0x0D
 
 
 All four represent the same number 13 above. In C, prefix 
@@ -40,14 +40,15 @@ Confirmation:-  1*(8^1) + 5*(8^0)
 ## 2) 2's complement - The Most important concept
 Computers don't store negative numbers with a minus sign. They use 2's complement.
 
-Rule:- Flip all bits, then add 1
+Rule:- 
+-> Flip all bits, then add 1
 
-+5     ->    0000 0101
-Flip   ->    1111 1010
-           +         1
-           ------------
-             1111 1011 = -5
-           ------------
+         0000 0101  (5)
+         1111 1010  (flip)
+       +         1
+        ------------
+         1111 1011 = -5
+        ------------
 
 Why 2's complement and not just a sign bit?
 -> Because addition and subtraction use the exact same hardware:-
@@ -62,11 +63,11 @@ No separate subtraction circuit needed. Elegant
 
 ## 3) Signed vs Unsigned - Ranges
 
-Type          8-bit range       32-bit range
+Type&emsp;8-bit range&emsp;32-bit range
 
-Unsigned       0 to 255       0 to 4,294,967,295
+Unsigned&emsp;0 to 255&emsp;0 to 4,294,967,295
 
-Signed       -128 to 127   -2,147,483,648 to 2,147,483,647
+Signed&emsp;-128 to 127&emsp;-2,147,483,648 to 2,147,483,647
 
 Notice: one more negative than positive. Because zero takes a slot on the positive side. This is why INT_MIN has no positive equivalent, -INT_MIN overflows!
 
@@ -76,8 +77,8 @@ When a multi-byte value is stored in memory, which byte goes first?
 
 Value: 0x12345678
 
-Big-endian      -> [12][34][56][78]  (MSB first - network byte order)
-Little-endian   -> [78][56][34][12]  (LSB first - x86, ARM default)
+Big-endian&emsp;-> [12][34][56][78]  (MSB first - network byte order)
+Little-endian&emsp;-> [78][56][34][12]  (LSB first - x86, ARM default)
 
 REAL INTERVIEW SCENARIO:-
 
