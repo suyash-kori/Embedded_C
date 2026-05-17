@@ -156,7 +156,8 @@ Precedence order (high -> low):
 ## Q&A - Test Yourself
 
 Q1) EVALUATE: Without a calculator, what is 0xA5 & 0x0F?
-Ans:-
+
+Answer:-
 0xA5 = 1010 0101
 0x0F = 0000 1111
       -----------
@@ -165,7 +166,8 @@ Ans:-
 AND with 0x0F always extracts the lower nibble
 
 Q2) TRICKY: What does ~0 give on a 32-bit system?
-Ans:- (-1)
+
+Answer:- (-1)
 ~0 flips all bits of 0x00000000 -> 0xFFFFFFFF.
 As a signed int, that's -1 in 2's complement.
 This is how memset(buf, 0xFF, size) works internally, settings all bits is the same as setting to -1 signed, or 255 unsigned per byte
@@ -174,7 +176,8 @@ Q3) INTERVIEW: What is the output?
 int x = 5;
 x = x | x << 1;
 printf("%d", x);
-Ans:-
+
+Answer:-
 5      = 0b0101
 5 << 1 = 0b1010 = 10
         ---------
@@ -183,7 +186,8 @@ Ans:-
 "<<" has higher precedence than |, so no extra parens needed here, but always add them for readability.
 
 Q4) TRICKY: True or False: x << 32 is 0 for a 32 bit integer.
-Ans:- FALSE
+
+Answer:- FALSE
 It's undefined behaviour in C. 
 Shifting by an amount >= bit width of the type is Undefined behaviour.
 The hardware may give 0, or it may give x unchanged (x86 masks shift count to 5 bits, so x << 32 = x << 0 = x).
@@ -192,7 +196,8 @@ if(n < 32)
 &emsp;result = x << n;
 
 Q5) Embedded: A UART status register is at 0x40011000. Bit 5 = TX empty, Bit 6 = RX ready. Write code to wait until RX is ready,then read data register at 0x40011004
-Ans:-
+
+Answer:-
 
 #define UART_SR (*((volatile uint32_t*)0x40011000))
 #define UART_DR (*((volatile uint32_t*)0x40011004))
