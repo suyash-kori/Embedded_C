@@ -57,19 +57,22 @@ GPIOA->ODR |= (1 << 5); // drive pin 5 HIGH
 XOR has three golden properties:
 a = 1010
 b = 1110
-1) a ^ a = 0 (self-cancellation) 
+1) a ^ a = 0 (self-cancellation)
+
      1010
      1010
     -------
      0000
     -------
 2) a ^ 0 = a (identity)
+
      1010
      0000
     ------
      1010
     ------
 3) a ^ b ^ b = a (undo)
+
       1010 -> a
       1110 -> b
     --------
@@ -158,8 +161,9 @@ Precedence order (high -> low):
 Q1) EVALUATE: Without a calculator, what is 0xA5 & 0x0F?
 
 Answer:-
-0xA5 = 1010 0101
-0x0F = 0000 1111
+
+       1010 0101 (0xA5)
+       0000 1111 (0x0F)
       -----------
        0000 0101 = (0x05)
       -----------
@@ -178,8 +182,9 @@ x = x | x << 1;
 printf("%d", x);
 
 Answer:-
-5      = 0b0101
-5 << 1 = 0b1010 = 10
+
+        0b0101 (5)
+        0b1010 = (5 << 1 = 10)
         ---------
          0b1111 = 15
         ---------
