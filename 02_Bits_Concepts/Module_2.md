@@ -57,21 +57,21 @@ GPIOA->ODR |= (1 << 5); // drive pin 5 HIGH
 XOR has three golden properties:
 a = 1010
 b = 1110
-1) a ^ a = 0 (self-cancellation)
+1] a ^ a = 0 (self-cancellation)
 
      1010
      1010
     -------
      0000
     -------
-2) a ^ 0 = a (identity)
+2] a ^ 0 = a (identity)
 
      1010
      0000
     ------
      1010
     ------
-3) a ^ b ^ b = a (undo)
+3] a ^ b ^ b = a (undo)
 
       1010 -> a
       1110 -> b
