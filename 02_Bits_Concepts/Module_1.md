@@ -89,31 +89,35 @@ Always use ntohl()/htonl() when crossing network <-> host boundaries.
 
 Q1- TRICKY: What is int x = 0x8000 0000 for a 32-bit signed int? What is -x?
 
-Answer: - 
-0x8000 0000 = INT_MIN
-            = i.e -2,147,483,648.
+Answer: -   
+0x8000 0000 = INT_MIN  
+            = i.e -2,147,483,648.  
+            
 And -x = -(INT_MIN) is undefined behaviour in C, the positive equivalent doesn't exist in 32-bit signed range.In practice it wraps back to INT_MIN itself on most hardware.
 
 Q2- CONCEPT: How many bytes does 0xDEADBEEF occupy, and what is it in decimal?
 
-Answer: - 
-4 bytes(32 bits). Decimal = 3,735,928,559.
+Answer: -   
+
+4 bytes(32 bits). Decimal = 3,735,928,559.  
 Commonly used as a magic number/memory poison value in embedded debugging to mark uninitialized memory.
 
 Q3- INTERVIEW: A firmware engineer reads a 16-bit value 0x0102 from a big-endian sensor on a little-endian MCU. What value does the MCU interpret it as without conversion?
 
-Answer: -
-The MCU reads bytes as [02][01] -> interprets as 0x0201 = 513 instead of the correct 258. Always byte swap when crossing endian boundaries.
+Answer: -  
+The MCU reads bytes as [02][01] -> interprets as 0x0201 = 513 instead of the correct 258. Always byte swap when crossing endian boundaries.  
+
 Use -> __builtin_bswap16(val) in GCC.
 
 Q4- CLASSIC: Without running it, what does this print?
 
-int x = -1;
-unsigned int y = x;
-printf("%u", y);
+int x = -1;  
+unsigned int y = x;  
+printf("%u", y);  
 
-Answer: -
-4294967295(=2^32 - 1 = 0xFFFF FFFF)
+Answer: -  
+
+4294967295(=2^32 - 1 = 0xFFFF FFFF)  
 Signed -1 in 2's complement is all 1s. Reinterpreted as unsigned, that's the max unsigned value. This implicit conversion is a very common bug in Embedded C.
 
 

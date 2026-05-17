@@ -166,14 +166,15 @@ Answer:-
        0000 1111 (0x0F)
       -----------
        0000 0101 = (0x05)
-      -----------
+      -----------  
+      
 AND with 0x0F always extracts the lower nibble
 
 Q2) TRICKY: What does ~0 give on a 32-bit system?
 
 Answer:- (-1)
-~0 flips all bits of 0x00000000 -> 0xFFFFFFFF.
-As a signed int, that's -1 in 2's complement.
+~0 flips all bits of 0x00000000 -> 0xFFFFFFFF.  
+As a signed int, that's -1 in 2's complement.  
 This is how memset(buf, 0xFF, size) works internally, settings all bits is the same as setting to -1 signed, or 255 unsigned per byte
 
 Q3) INTERVIEW: What is the output?
@@ -187,15 +188,16 @@ Answer:-
         0b1010 = (5 << 1 = 10)
         ---------
          0b1111 = 15
-        ---------
+        ---------  
+
 "<<" has higher precedence than |, so no extra parens needed here, but always add them for readability.
 
 Q4) TRICKY: True or False: x << 32 is 0 for a 32 bit integer.
 
 Answer:- FALSE
-It's undefined behaviour in C. 
-Shifting by an amount >= bit width of the type is Undefined behaviour.
-The hardware may give 0, or it may give x unchanged (x86 masks shift count to 5 bits, so x << 32 = x << 0 = x).
+It's undefined behaviour in C.  
+Shifting by an amount >= bit width of the type is Undefined behaviour.  
+The hardware may give 0, or it may give x unchanged (x86 masks shift count to 5 bits, so x << 32 = x << 0 = x).  
 Always guard:
 if(n < 32)
 &emsp;result = x << n;
@@ -204,12 +206,13 @@ Q5) Embedded: A UART status register is at 0x40011000. Bit 5 = TX empty, Bit 6 =
 
 Answer:-
 
-#define UART_SR (*((volatile uint32_t*)0x40011000))
-#define UART_DR (*((volatile uint32_t*)0x40011004))
-#define RX_READY (1 << 6)
+#define UART_SR (*((volatile uint32_t*)0x40011000))  
+#define UART_DR (*((volatile uint32_t*)0x40011004))  
+#define RX_READY (1 << 6)  
 
-while(!(UART_SR & RX_READY)); // poll bit 6
-unit8_t data = UART_DR & 0xFF; // read data
+while(!(UART_SR & RX_READY)); // poll bit 6  
+unit8_t data = UART_DR & 0xFF; // read data  
+
 
 key points: volatile is mandatory, mask DR to 8 bits, always poll before read.
          
