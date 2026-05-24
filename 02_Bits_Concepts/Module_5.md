@@ -1,4 +1,4 @@
-# Bit Fields & Strcuts in C  
+# Bit Fields & Structs in C  
 
 ### Why this matters for interviews  
 
