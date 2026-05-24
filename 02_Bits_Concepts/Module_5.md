@@ -9,10 +9,10 @@ This module separates hobbyist embedded developers from professional firmware en
 The compiler inserts invisible padding bytes to keep members naturally aligned (an int must sit at a 4-byte boundary, etc.).  
 
 struct Bad  
-{
-    char a; // 1 byte  
-    int b;  // 4 bytes, but needs 4-byte alignment!  
-    char c; // 1 byte  
+{  
+&emsp;char a; // 1 byte  
+&emsp;int b;  // 4 bytes, but needs 4-byte alignment!  
+&emsp;char c; // 1 byte  
 };  
 
 What actually sits in memory:  
@@ -24,10 +24,10 @@ sizeof(struct Bad) = 12  // NOT 6!
 Reordering eliminates padding:  
 
 struct Good  
-{
-    int  b;  // 4 bytes  
-    char a;  // 1 byte  
-    char c;  // 1 byte  
+{  
+&emsp;int  b;  // 4 bytes  
+&emsp;char a;  // 1 byte  
+&emsp;char c;  // 1 byte  
              // 2 bytes pad at end for alignment  
 };  
 sizeof(struct Good) = 8 // better  
@@ -39,10 +39,10 @@ Rule: Order members largest to smallest to minimizes padding.
 Forces the compiler to remove all padding.  
 
 struct __attribute__((packed)) PackedReg  
-{
-    char a; // 1 byte  
-    int b;  // 4 bytes - starts at offset 1(unaligned!)  
-    char c; // 1 byte  
+{  
+&emsp;char a; // 1 byte  
+&emsp;int b;  // 4 bytes - starts at offset 1(unaligned!)  
+&emsp;char c; // 1 byte  
 };  
 sizeof(PackedReg) = 6 // no padding  
 
@@ -62,12 +62,12 @@ Safe rule: Only use packed when you control the base pointer alignment AND you'v
 ## Bit Fields - Readable Register Mapping  
 
 typedef struct  
-{
-    uint32_t clk_en    : 1;  // bit 0  
-    uint32_t prescaler : 1;  // bit 1  
-    uint32_t src       : 2;  // bits 3:2  
-    uint32_t divider   : 4;  // bits 7:4  
-    uint32_t reserved  : 24; // bits 31:8  
+{  
+&emsp;uint32_t clk_en    : 1;  // bit 0  
+&emsp;uint32_t prescaler : 1;  // bit 1  
+&emsp;uint32_t src       : 2;  // bits 3:2  
+&emsp;uint32_t divider   : 4;  // bits 7:4  
+&emsp;uint32_t reserved  : 24; // bits 31:8  
 } ClockReg_t;  
 
 Much more readable than raw mask/shift macros:  
@@ -97,9 +97,9 @@ Bit fields don't have byte level addresses. You can't pass them to functions exp
 Warning 3 - Bit fields can't span storage units  
 
 typedef struct  
-{
-    uint8_t a:6;  
-    uint8_t b:4;  // may NOT span into next byte - behavior varies  
+{  
+&emsp;uint8_t a:6;  
+&emsp;uint8_t b:4;  // may NOT span into next byte - behavior varies  
 } Tricky;  
 
 Compiler may insert padding between a and b to avoid crossing the byte boundary.  
@@ -107,8 +107,8 @@ Compiler may insert padding between a and b to avoid crossing the byte boundary.
 Warning 4 - Signed bit fields are tricky  
 
 typedef struct  
-{
-    int val:3;  // range: -4 to 3 (3-bit signed)  
+{  
+&emsp;int val:3;  // range: -4 to 3 (3-bit signed)  
 } S;  
 S s;  
 s.val = 4;   // silently wraps to -4!  
@@ -120,16 +120,16 @@ Always use "unsigned" bit fields unless you explicitly need sign extension.
 The professional solution: use a union to access the register both as raw bits AND as named fields.  
 
 typedef union  
-{
-    uint32_t raw;         // full 32-bit access  
-    struct  
-    {
-        uint32_t clk_en   : 1;  
-        uint32_t prescaler: 1;  
-        uint32_t src      : 2;  
-        uint32_t divider  : 4;  
-        uint32_t reserved : 24;  
-    } bits;  
+{  
+&emsp;uint32_t raw;         // full 32-bit access  
+&emsp;struct  
+&emsp;{
+&emsp;&emsp;uint32_t clk_en   : 1;  
+&emsp;&emsp;uint32_t prescaler: 1;  
+&emsp;&emsp;uint32_t src      : 2;  
+&emsp;&emsp;uint32_t divider  : 4;  
+&emsp;&emsp;uint32_t reserved : 24;  
+&emsp;} bits;  
 } ClockReg_t;  
 
 volatile ClockReg_t *CLK = (ClockReg_t*) 0x40001000;  
@@ -194,27 +194,27 @@ This is the correct type for status/ID registers. The "const" catches accidental
 Always mentally calculates struct sizes in interviews:  
 
 struct A  
-{
-    char a;  // 1 byte + 3 pad  
-    int  b;  // 4 bytes  
-    short c; // 2 bytes + pad  
+{  
+&emsp;char a;  // 1 byte + 3 pad  
+&emsp;int  b;  // 4 bytes  
+&emsp;short c; // 2 bytes + pad  
 };  
 // sizeof = 12  
 
 struct B  
-{
-    int b;   // 4 bytes  
-    short c; // 2 bytes  
-    char a;  // 1 byte + 1 pad  
+{  
+&emsp;int b;   // 4 bytes  
+&emsp;short c; // 2 bytes  
+&emsp;char a;  // 1 byte + 1 pad  
 };  
 // sizeof = 8  
 
 struct C  
-{
-    int b;  // 4 bytes  
-    short c;// 2 bytes  
-    char a; // 1 byte  
-    char d; // 1 byte - no pad needed!  
+{  
+&emsp;int b;  // 4 bytes  
+&emsp;short c;// 2 bytes  
+&emsp;char a; // 1 byte  
+&emsp;char d; // 1 byte - no pad needed!  
 };  
 // sizeof = 8  
 
@@ -224,11 +224,11 @@ Trailing padding rule: Struct size is always a multiple of it's largest member's
 
 Q1] INTERVIEW: What is "sizeof" this struct and why?  
 struct Foo  
-{
-    char a;  
-    char b;  
-    int c;  
-    char d;  
+{  
+&emsp;char a;  
+&emsp;char b;  
+&emsp;int c;  
+&emsp;char d;  
 };  
 
 Answer:  
@@ -243,9 +243,9 @@ Reorder to int c; char a; char b; char d; -> sizeof = 8.
 Q2] TRICKY: Why does this code potentially fail on an ARM Cortex-M0?  
 
 struct __attribute__((packed)) Packet  
-{
-    uint8_t cmd;  
-    uint32_t payload;  
+{  
+&emsp;uint8_t cmd;  
+&emsp;uint32_t payload;  
 } pkt;  
 uint32_t val = pkt.payload;  
 Answer:-  
@@ -261,14 +261,14 @@ Answer:-
 bool data_ready = false;  
 
 void UART_IRQHandler(void)  
-{
-    data_ready = true;  
+{  
+&emsp;data_ready = true;  
 }
 
 int main(void)  
-{
-    while(!data_ready);  // wait  
-    process();  
+{  
+&emsp;while(!data_ready);  // wait  
+&emsp;process();  
 }  
 Answer:-  
 
@@ -280,8 +280,8 @@ volatile bool data_ready = false;
 Q4] INTERVIEW: Can you take the address of a bit field member?  
 
 typedef struct  
-{
-    uint32_t flag : 1;  
+{  
+&emsp;uint32_t flag : 1;  
 } Reg;  
 Reg r;  
 uint32_t *p = &r.flag;  // ?  
@@ -292,13 +292,13 @@ Compile error. Bit fields don't have addressable memory locations, they share a 
 
 Q5] QUALCOMM STYLE: A register union is defined correctly but reads return wrong values. Volatile is missing. Where exactly should it be placed?  
 typedef union  
-{
-    uint32_t raw;  
-    struct  
-    {
-        uint32_t en : 1;  
-        uint32_t mode:3;  
-    } bits;  
+{  
+&emsp;uint32_t raw;  
+&emsp;struct  
+&emsp;{  
+&emsp;&emsp;uint32_t en : 1;  
+&emsp;&emsp;uint32_t mode:3;  
+&emsp;} bits;  
 } Reg_t;  
 Reg_t *REG = (Reg_t*)0x40005000;  
 
