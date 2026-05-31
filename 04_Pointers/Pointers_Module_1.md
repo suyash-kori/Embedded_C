@@ -159,9 +159,11 @@ int global = 100;  // data segment
 
 int main(void)  
 {  
-    int local = 200; // stack  
-    int *p = &local;  // p is on stack, holds stack address  
 
+    int local = 200; // stack  
+
+    int *p = &local;  // p is on stack, holds stack address  
+    
     printf("local value : %d\n", local);  // 200  
     printf("local address : %p\n", (void*)&local);  
     printf("p value : %p\n", (void*)p);  // same as &local  
