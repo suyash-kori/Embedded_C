@@ -316,7 +316,7 @@ int arr[3] = {10, 20, 30};
 int *p = arr;  
 
 int a = *ptr;  // a = 10, p now points to arr[1]  
-int b = (*p)++; // b = 21, arr[1] becomes 21, p still points to arr[i]  
+int b = (*p)++; // b = 20, arr[1] becomes 21, p still points to arr[i]  
 
 Q6] What is "ptrdiff_t" and see it instead of "int"?  
 
