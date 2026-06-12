@@ -138,7 +138,7 @@ int *end = arr + 5; // one past the last element, valid address but don't derefe
 
 while(p < end)  
 {  
-    *p++ = 0;  
+&emsp;*p++ = 0;  
 }  
 
 "arr + 5" is a pointer to one-past-the-end. C explicitly allows this address to exist and be compared against, you just can't dereference it. This is the standard idiom for end-of-array sentinel.  
@@ -151,10 +151,10 @@ Arrays are never passed by value in C. When you pass an array to a function, you
 
 void print_array(int *arr,int len)  
 {  
-    for(int i = 0; i < len; i++)  
-    {  
-        printf("%d ", arr[i]);  
-    }  
+&emsp;for(int i = 0; i < len; i++)  
+&emsp;{  
+&emsp;&emsp;printf("%d ", arr[i]);  
+&emsp;}  
 }  
 
 int arr[5] = {1,2,3,4,5};  
@@ -172,14 +172,14 @@ Consequence: "sizeof(arr)" inside the function gives "sizeof(int*)", not the siz
 
 void foo(int arrr[])  
 {  
-    printf("%zu\n", sizeof(arr));  // prints 4 or 8 - size of pointer, NOT array!  
+&emsp;printf("%zu\n", sizeof(arr));  // prints 4 or 8 - size of pointer, NOT array!  
 }  
 
 int main(void)  
 {  
-    int arr[10];  
-    printf("%zu\n", sizeof(arr));  // prints 40, correct, 10 * 4  
-    foo(arr);  
+&emsp;int arr[10];  
+&emsp;printf("%zu\n", sizeof(arr));  // prints 40, correct, 10 * 4  
+&emsp;foo(arr);  
 
 }  
 
@@ -188,9 +188,9 @@ int main(void)
 A 2D array is stored in row-major order, all elements of row 0, then all of row 1, and so on, contiguously in memory.  
 
 int matrix[3][4] = {  
-    {1, 2, 3, 4},  // row 0  
-    {5, 6, 7, 8},  // row 1  
-    {9, 10, 11, 12}// row 2  
+&emsp;{1, 2, 3, 4},  // row 0  
+&emsp;{5, 6, 7, 8},  // row 1  
+&emsp;{9, 10, 11, 12}// row 2  
 };  
 
 Memory layout:  
@@ -212,9 +212,9 @@ When passing a 2D array to a function, you must specify the column count because
 
 void print_matrix(int arr[][4]. int rows)  // column count mandatory  
 {  
-    for (int r = 0; r < rows; r++)  
-        for (int c = 0; c < 4; c++)  
-            printf("%d ", arr[r][c]);  
+&emsp;for (int r = 0; r < rows; r++)  
+&emsp;&emsp;for (int c = 0; c < 4; c++)  
+&emsp;&emsp;&emsp;printf("%d ", arr[r][c]);  
 }  
 
 ## A complete practical example  
@@ -229,23 +229,23 @@ This is the kind of code you'd write in an actual embedded firmware, processing 
 
 uint8_t *find_byte(uint8_t *buf, size_t len, uint8_t target)  
 {  
-    uint8_t *end = buf + len;  
-    for (uint8_t *p = buf; p < end; p++)  
-    {  
-        if (*p == target)  
-            return p;  // return pointer to found location  
-    }  
-    return NULL;  // not found  
+&emsp;uint8_t *end = buf + len;  
+&emsp;for (uint8_t *p = buf; p < end; p++)  
+&emsp;{  
+&emsp;&emsp;if (*p == target)  
+&emsp;&emsp;&emsp;return p;  // return pointer to found location  
+&emsp;}  
+&emsp;return NULL;  // not found  
 }  
 
 /* Copy len bytes from src to dst */  
 
 void mem_copy(uint8_t *dst, const uint8_t *src, size_t len)  
 {  
-    while (len--)  
-    {  
-        *dst++ = *src++;  // copy byte and advance both pointers  
-    }  
+&emsp;while (len--)  
+&emsp;{  
+&emsp;&emsp;*dst++ = *src++;  // copy byte and advance both pointers  
+&emsp;}  
 }  
 
 /* Usage */  
@@ -254,8 +254,8 @@ uint8_t rx_buf[64] = { 0x01, 0x02, 0xAA, 0x03, 0x04 };
 uint8_t *found = find_byte(rx_buf, 64, 0xAA);  
 if (found != NULL)  
 {  
-    ptrdiff_t offset = found - rx_buf;  // how many bytes from start  
-    // offset == 2  
+&emsp;ptrdiff_t offset = found - rx_buf;  // how many bytes from start  
+&emsp;// offset == 2  
 }  
 
 What is size_t?  
