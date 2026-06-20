@@ -8,22 +8,22 @@ The heap is a region of SRAM sitting between the BSS segment and the stack. On a
 
 SRAM Layout (typical Cortex-M):  
 
-|------------------------------------| <- top of SRAM (e.g  0x20010000)  
-/&emsp;&emsp;-STACK&emsp;&emsp;&emsp;/  
-/&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;/  
-/&emsp;&emsp;(free space)&emsp;&emsp;/  grows downward
-/&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;/  
-/&emsp;&emsp;-HEAP-&emsp;&emsp;&emsp;/  grows upward  
-|------------------------------------| <- heap start  
-/&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;/
-/&emsp;&emsp;-BSS--&emsp;&emsp;&emsp;/  uninitialized globals
-/&emsp; zeroed at startup&emsp;&emsp;/  
-/&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;/  
-|-------------------------------------|  
-/&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;/  
-/&emsp;&emsp;-DATA-&emsp;&emsp;&emsp;/  initialized globals
-/&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;/  
-|-------------------------------------| <- 0x2000000 (start of SRAM)  
+<------------------------------------> <- top of SRAM (e.g  0x20010000)  
+|-------------STACK------------------|  
+|------------------------------------|  
+|-----------(free space)-------------|  grows downward
+|------------------------------------|    
+|-------------HEAP-------------------|  grows upward  
+<------------------------------------> <- heap start  
+|------------------------------------|
+|-------------BSS--------------------|  uninitialized globals
+|-------zeroed at startup------------|  
+|------------------------------------|  
+<------------------------------------> 
+|------------------------------------|  
+|-------------DATA-------------------|  initialized globals
+|------------------------------------|
+<------------------------------------> <- 0x2000000 (start of SRAM)  
 
 The stack grows down, the heap grows up. If they meet, heap exhausion or stack overflow, your program is in undefined territory. On a desktop OS, the OS catches this. On bare-metal embedded, nothing catches it. The stack silently overwrites heap data or vice versa, and you get mysterous corruption that is extremely hard to debug.  
 
