@@ -21,40 +21,41 @@ This is called "Memory-Mapped I/O", peripherals are controlled by reading/writin
 ARM defined a standard 4GB address space for all Cortex-M processors(32-bit address bus = 2^32 = 4,294,967,296 addresses = 4GB). This space is divided into fixed regions.  
 
   
-0xFFFFFFFF  |------------------------------------------------|
+0xFFFFFFFF  |------------------------------------------------|  
 &emsp;&emsp;|........Vendor Specific / Reserved..............|  
-&emsp;&emsp;|................................................|   --> ~0.5GB
+&emsp;&emsp;|................................................|   --> ~0.5GB  
 &emsp;&emsp;|................................................|  
 0xE0000000  |------------------------------------------------|  
 &emsp;&emsp;|................................................|  
 &emsp;&emsp;|.....Private Peripheral Bus (PPB)...............|  
-&emsp;&emsp;|......(NVIC, SysTick, CoreDebug)................|   --> 512MB
+&emsp;&emsp;|......(NVIC, SysTick, CoreDebug)................|   --> 512MB  
 0xA0000000  |------------------------------------------------|  
 &emsp;&emsp;|................................................|  
-&emsp;&emsp;|.........External Device Space..................|   --> 1 GB
+&emsp;&emsp;|.........External Device Space..................|   --> 1 GB  
 &emsp;&emsp;|.........(External peripherals).................|  
 &emsp;&emsp;|................................................|  
 0x60000000  |------------------------------------------------|  
 &emsp;&emsp;|................................................|  
-&emsp;&emsp;|..........External RAM region...................|   --> 1 GB
+&emsp;&emsp;|..........External RAM region...................|   --> 1 GB  
 &emsp;&emsp;|.........(FSMC/FMC SDRAM, SRAM).................|  
 &emsp;&emsp;|................................................|  
 0x40000000  |------------------------------------------------|  
 &emsp;&emsp;|................................................|  
-&emsp;&emsp;|..........Peripheral RAM Region.................|   --> 512MB
+&emsp;&emsp;|..........Peripheral RAM Region.................|   --> 512MB  
 &emsp;&emsp;|........(GPIO, UART, SPI, YIM,..)...............|  
 &emsp;&emsp;|................................................|  
 0x20000000  |------------------------------------------------|  
 &emsp;&emsp;|................................................|  
-&emsp;&emsp;|............SRAM Region.........................|   --> 512MB
+&emsp;&emsp;|............SRAM Region.........................|   --> 512MB  
 &emsp;&emsp;|...........(Internal SRAM)......................|  
 &emsp;&emsp;|................................................|  
 0x00000000  |------------------------------------------------|  
 &emsp;&emsp;|................................................|  
 &emsp;&emsp;|............Code Region.........................|  
-&emsp;&emsp;|........(Flash, Boot ROM, ITCM).................|   --> 512 MB
+&emsp;&emsp;|........(Flash, Boot ROM, ITCM).................|   --> 512 MB  
 &emsp;&emsp;|................................................|  
-&emsp;&emsp;|------------------------------------------------|
+&emsp;&emsp;|------------------------------------------------|  
+
 
 Key Insight:  
 Only a tiny fraction of this 4GB space is actually populated. The rest is empty (reading it causes a HardFault).  
