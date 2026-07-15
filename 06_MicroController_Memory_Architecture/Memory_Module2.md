@@ -116,6 +116,64 @@ Let's make this real. Here's the actual memory map of the Blue Pill's STM32F103C
 |---------------|---SRAM-(boot-mode-config)----|--------------------|  
 |-------------------------------------------------------------------|  
 
+## The code Region (0x00000000)  
+
+This is subtle and confuses many begineers. Address "0x00000000" is aliased, it doesn't point to a fixed physical location. Instead, what it points to depends on the BOOT pins:  
+
+BOOT1------BOOT0-----|0x00000000-aliases-to-----------|Boots-from........|  
+
+X-----------0--------|Flash-(0x08000000)--------------|Your-program------|  
+0-----------1--------|System-Memory-(0x1FFFF000)------|ST-Bootloader-----|  
+1-----------1--------|SRAM-(0x20000000)---------------|RAM-(debug use)---|  
+
+Why does this matter?  
+The CPU always starts executing from address "0x00000000" at reset. By aliasing it to Flash, your program runs. By aliasing to System Memory, you can flash via UART without a programmer!  
+
+## The Bus Architecture, How Data Actually Travels  
+
+|--------------CPU (Cortex-M3)-------------------|  
+<---------------------|-------------------------->  
+<---------------------|-------------------------->  
+<---------------------|-------------------------->  
+<---------------------|-------------------------->  
+<---------------------V-------------------------->  
+|-----------------| AHB Bus |--------------------|  
+|-----------------|  Matrix |--------------------|  
+<-------------------|-----|---------------------->  
+<-------------------|-----|---------------------->  
+<-------------------V-----V---------------------->  
+|-----------------|SRAM|-|Flash|-----------------|  
+|-----------------|20KB|-|64KB|------------------|  
+
+CPU (Cortex-M3)
+            │
+            │ ICode Bus (Instructions from Flash)
+            │ DCode Bus (Data from Flash - const, literals)
+            │ System Bus (SRAM + Peripherals)
+            │
+    ┌───────▼────────┐
+    │   AHB Bus      │  ← High-speed bus (same speed as CPU clock)
+    │   Matrix       │
+    └───┬────────┬───┘
+        │        │
+   ┌────▼──┐  ┌──▼────┐
+   │ SRAM  │  │ Flash │   ← Directly on AHB (fast!)
+   │ 20KB  │  │ 64KB  │
+   └───────┘  └───────┘
+        │
+   ┌────▼──────────────┐
+   │  AHB-to-APB       │  ← Bridge (adds latency!)
+   │  Bridge           │
+   └───┬───────────┬───┘
+       │           │
+  ┌────▼──┐   ┌────▼──┐
+  │ APB2  │   │ APB1  │
+  │(fast) │   │(slow) │
+  └───┬───┘   └───┬───┘
+      │            │
+  GPIO, SPI1,  UART2-5,
+  USART1, ADC  SPI2, I2C,
+               TIM2-7
 
 
 
