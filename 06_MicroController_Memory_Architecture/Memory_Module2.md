@@ -207,11 +207,15 @@ The system bus handles everything else, SRAM reads/writes, peripheral access.
 Flash is slower than the CPU at high clock speeds. The CPU has to wait for Flash to respond:  
 
 STM32F103 Flash wait states:  
-|---------------------------------------------------|  
-|SYSCLK--------------|--Wait-States(LATENCY)------|  
-|0-24-MHz------------|--0(no-wait)----------------|  
-|24-48MHz------------|--1-wait-state--------------|  
-|48-72MHz------------|--2-wait-states-------------|  
+
+
+
+|----SYSCLK-----------|--Wait-States(LATENCY)------|  
+|----0-24-MHz---------|--0(no-wait)----------------|  
+|----24-48MHz---------|--1-wait-state--------------|  
+|----48-72MHz---------|--2-wait-states-------------|  
+
+
 
 At 72MHz with 2 wait states:  
 
