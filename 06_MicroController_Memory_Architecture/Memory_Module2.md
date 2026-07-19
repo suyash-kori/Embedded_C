@@ -176,6 +176,52 @@ APB1 runs at HALF the CPU speed. This means:
 - Timers on APB1 get 72MHz (there's a *2 multiplier for timers when APB1 prescaler != 1)  
 - When you configure baud rates, you need to know which bus your peripheral is on!  
 
+## Three Separate Buses to Flash - ICode, DCode, System  
+
+This is an often missed detail in ARM Cortex-M:  
+
+|---------Flash Memory (0x08000000)-------------|  
+|---------------------|-------------------------|  
+|---------------------|-------------------------|  
+|------------_________|_________----------------|  
+|-----------|-------------------|---------------|  
+|-----------V-------------------V---------------|  
+|-------ICode-Bus---------DCode-Bus-------------|  
+|-------(Instructions)----(Data/Constants)------|  
+|-----------|-------------------|---------------|  
+|-----------V-------------------V---------------|  
+|-----CPU-fetch-Unit---CPU-Load/Store-Unit------|  
+
+The CPU has two separate buses going to Flash:  
+
+- ICode: Fetches instructions (your code)  
+- Dcode: Fetches data from Flash (const arrays, string literals)  
+
+
+This means the CPU can fetch the next instruction AND read a "const" table from Flash simultaneously, no stall! This is a hardware level pipeline optimization you get for free.  
+
+The system bus handles everything else, SRAM reads/writes, peripheral access.  
+
+## Flash Wait States, A Critical Performance Detail  
+
+Flash is slower than the CPU at high clock speeds. The CPU has to wait for Flash to respond:  
+
+STM32F103 Flash wait states:  
+|---------------------------------------------------|  
+|SYSCLK--------------|--Wait-States(LATENCY)------|  
+|0-24-MHz------------|--0(no-wait)----------------|  
+|24-48MHz------------|--1-wait-state--------------|  
+|48-72MHz------------|--2-wait-states-------------|  
+
+At 72MHz with 2 wait states:  
+
+Clock:--|^^|__|^^|__|^^|__|^^|__|^^|__|  
+Flash:--[-request-][data-out]    
+CPU:----[-fetch-][WAIT][WAIT][execute]  
+|-------------------^-----^------------------------|    
+|-------------wasting-2-cycles-waiting-for-Flash!--|  
+
+
 
 
 
