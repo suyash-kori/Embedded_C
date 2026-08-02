@@ -160,24 +160,25 @@ int global = 100;  // data segment
 int main(void)  
 {  
 
-    int local = 200; // stack  
+&emsp;int local = 200; // stack  
 
-    int *p = &local;  // p is on stack, holds stack address  
+&emsp;int *p = &local;  // p is on stack, holds stack address  
+
+&emsp;printf("local value : %d\n", local);  // 200  
+&emsp;printf("local address : %p\n", (void*)&local);  
+&emsp;printf("p value : %p\n", (void*)p);  // same as &local  
+&emsp;printf("p address : %p\n", (void*)&p); // different-p itself is on stack  
+&emsp;printf("via pointer : %d\n", *p);  // 200  
+
+&emsp;*p = 999;  
+&emsp;printf("local after : %d\n", local);  // 999 - changed via pointer  
+
+&emsp;// pointer to pointer  
+&emsp;int **pp = &p;  
+&emsp;printf("via pp    : %d\n", **pp);  // 999  
+
+&emsp;return 0;  
     
-    printf("local value : %d\n", local);  // 200  
-    printf("local address : %p\n", (void*)&local);  
-    printf("p value : %p\n", (void*)p);  // same as &local  
-    printf("p address : %p\n", (void*)&p); // different-p itself is on stack  
-    printf("via pointer : %d\n", *p);  // 200  
-
-    *p = 999;  
-    printf("local after : %d\n", local);  // 999 - changed via pointer  
-
-    // pointer to pointer  
-    int **pp = &p;  
-    printf("via pp    : %d\n", **pp);  // 999  
-
-    return 0;  
 }  
 
 ## QUESTION AND ANSWER  
