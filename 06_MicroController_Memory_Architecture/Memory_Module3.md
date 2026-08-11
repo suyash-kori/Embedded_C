@@ -233,3 +233,283 @@ uint32_t init_array[10000] = {1};  // .data -> 10KB in Flash AND 10KB in SRAM!
 Always use ".bss" when you don't need specific initial values. It saves Flash space.  
 
 
+## The Stack, Function Call Memory  
+
+The stack is the most used piece of RAM in any embedded system. Every function call uses it.  
+
+What goes on the stack?  
+
+void foo(int x)  
+{  
+&emsp;int local_a = 10;  // <- stack  
+&emsp;char local_buf[64];  // <- stack (64 bytes!)  
+&emsp;int local_b = x*2; // <- stack  
+}  
+
+- Local variables  
+- Function parameters (when they don't fit in registers)  
+- Return addresses (where to go after function returns)  
+- Saved registers (compiler pushes/pops as needed)  
+- Function call stack frame  
+
+Stack grows DOWNWARD  
+
+High address (0x20004FFF) = Top of SRAM = Initial SP  
+|-----|--------------------------------------------|  
+|-----|---<-SP-starts-here-at-reset----------------|  
+|-----V--------------------------------------------|  
+|----------------| <- SP after main() is called  
+|--main()-frame--|  
+|--local-vars----|  
+|----------------| <- SP after foo() is called from main()  
+|---foo()-frame--|  
+|--local-vars----|  
+|--return-addr---|  
+|----------------| <- SP after bar() is called from foo()  
+|--bar()-frame---|  
+|------...-------|  
+|----------------|  
+|-------|--------|  
+|-------V--------|  
+(danger zone-heap below!)  
+
+Stack Frame in Detail  
+
+When you call a function, the CPU builds a stack frame:  
+
+ARM Cortex-M hardware auto-pushes on interrupt (exception frame):  
+
+|---------------------|  <- Old SP  
+|--------xPSR---------|  
+|--------PC-----------| <- Return address (where to go after ISR)  
+|--------LR-----------| <- Link Register  
+|--------R12----------|  
+|--------R3-----------|  
+|--------R2-----------|  
+|--------R1-----------|  
+|--------R0-----------|  
+|---------------------|  <- New SP(hardware moved it here automatically)  
+
+For regular function calls (not interrupts), the compiler generates PUSH/POP instructions to save/restore registers per the AAPCS(ARM Architecture Procedure Call Standard):  
+- R0-R3: arguments/return values (caller doesn't save)  
+- R4-R11: must be preserved by callee  
+- R12,LR: caller-saved  
+
+Stack Overflow, The Silent Killer  
+
+SRAM:  
+
+|----------------------| <- 0x20004FFF  
+|--------Stack---------|  
+|--(growing-down)------|  
+|--------|-------------|  
+|--------V-------------|  
+|---[stack-overflow]---| <- Stack crashes INTO heap or .bss!  
+|--------|-------------|  
+|--------V-------------|  
+|-------Heap-----------|  
+|---(growing-up)-------|  
+|----------------------|  
+|------.bss------------|  
+|----------------------|  
+|-------.data----------|  
+|----------------------| <- 0x20000000  
+
+On most bare metal systems,  
+stack overflow = silent memory corruption. There's no OS to catch it. Your variables silently get overwritten. The bug manifests far from the crash point.  
+
+How to detect it:  
+
+// 1. Stack painting, fill stack with known pattern at starup  
+memset(&_estack_guard, 0xDEADBEEF, STACK_SIZE);  
+// Check periodically if the pattern is still there  
+
+// 2. MPU (Memory Protection Unit), hardware stack overflow detection  
+// Configure MPU to fault on access below stack limit  
+// Available on Cortex-M3/M4/M7 (not M0)  
+
+// 3. FreeRTOS: uxTaskGetStackHighWaterMark()  
+// Returns minimum free stack space ever seen for a task  
+
+## The Heap, Dynamic Memory  
+
+The heap is the region used by "malloc()". "calloc()",new(C++)  
+
+SRAM:  
+
+|-------------------| -> 0x20004FFF  
+|-------Stack-------|  
+|---[free-space]----| <- Both compete for this!  
+|-------------------|  
+|-------Heap--------|  
+|-------------------| <- _end (end of .bss = start of heap)  
+|-----.bss----------|
+|-------------------|  
+|-----.data---------| <- 0x20000000  
+
+Why heap is dangerous in embedded:  
+
+// This is fine on a PC. On a 20KB SRAM MCU:  
+void process_data()  
+{
+&emsp;uint8_t *buf = malloc(512);  // OK  
+&emsp;// ....use-buf....  
+&emsp;free(buf);  
+
+&emsp;uint8_t *buf2 = malloc(300);   // OK  
+&emsp;free(buf2);  
+
+&emsp;uint8_t *buf3 = malloc(512);  // Maybe FAILS due to fragmentation  
+}  
+
+Heap fragmentation: After many malloc/free cycles, free memory becomes scattered in small chunks. Even if total free bytes > requested size, "malloc" may fail because no single contiguous block is large enough.  
+
+The embedded community's stance on heap:  
+
+Safety-critical systems (automotive MISRA, aerospace D0-178C):  
+-> malloc() is BANNED entirely  
+
+General embedded best practice:  
+-> Allocate everything statically at compile time  
+-> Use static memory pools if dynamic like behaviour needed  
+-> If you must use heap: allocate once at startup, never free  
+
+## What Happens Before main(), The Full Startup Sequence  
+
+This is the part no tutorial ever explains clearly. Here's the complete sequence from power-on to main():  
+
+Power ON / Reset pin asserted  
+|  
+V  
+- Hardware reads [0x00000000] -> loads SP  
+Hardware reads [0x00000004] -> jumps to Reset_Handler  
+|  
+V  
+Reset_Handler(in startup_stm32f103xb.s)  
+a. Set SP (already done by hardware, but some code re-does it)  
+
+b. Copy .data from Flash (LMA) -> SRAM (VMA)  
+src = &_sidata (Flash)  
+dst = &_sdata (SRAM)  
+while(dst < &_edata) *dst++ = *src++;  
+
+c. Zero fill .bss in SRAM  
+ptr = &_sbss  
+while(ptr < &_ebss) *ptr++ = 0;  
+
+d. (Optional) Initialize FPU if Cortex-M4/M7  
+SCB->CPACR |= (0xF << 20);  
+
+e. Call SystemInit()  
+-> Sets up PLL, configures clocks (RCC)  
+-> MCU might be running at 8MHz, this switches to 72MHz  
+-> Sets Flash wait states for new clock speed  
+
+f. Call __libc_init_array()  
+-> Calls all C++ constructors (static objects)  
+-> Calls functions in .preinit_array and .init_array  
+
+g. Call main()  
+|  
+V  
+main() starts, all your variables have their initial values  
+stack is clean, .bss is zero, .data is initialized  
+clocks are configured, you're running at full speed  
+
+This entire startup sequence runs in microseconds, usually 10-100micro seconds before main() starts.  
+
+## 9. Function to Assembly, What Really Happens  
+
+Let's reace one function call end-to-end through memory  
+
+int multiply (int a, int b)  
+{  
+&emsp;int result = a*b;  // local var on stack  
+&emsp;return result;  
+}  
+
+int main(void)  
+{  
+&emsp;int x = multiply(3,4);  // call  
+}  
+
+Memory activity during this call:  
+
+1. main() calls multiply(3,4):  
+
+-> R0 = 3, R1 = 4 (ARM calling convention: args in R0-R3)  
+-> BL multiply (Branch with Link: LR = return address)  
+-> SP decrement (stack frame for multiply)  
+
+2. Inside multiply():  
+
+-> Stack frame created:  
+[SP+0] = saved LR (where to return)  
+[SP+4] = result (local variable)  
+
+-> MUL instruction: R0 = R0*R1 = 12  
+-> Store 12 to [SP+4] (result on stack)  
+-> Load result back into R0 (return value)  
+-> POP, BX LR (return: SP restored, PC = return addr)  
+
+3. Back in main():  
+
+-> R0 = 12 (return value)  
+-> STR R0, [SP+offset_of_x] (store into x on stack)  
+
+Nothing in Flash was modified. Everything happened in CPU registers and SRAM stack. This is the normal execution path.  
+
+## 10. Special Case, Functions in RAM (.ramfunc)  
+
+Sometimes you need to copy code to SRAM and execute from there. Why?  
+
+Reasons to run code from RAM:  
+
+1. Flash erase/write routines  
+-> You can't execute FROM Flash while erasing Flash!  
+-> The falsh driver MUST run from RAM  
+
+2. Timing-critical ISRs  
+-> SRAM access is faster (no wait states)  
+-> Deterministic latency (no prefetch uncertainity)  
+
+3. Low-power modes  
+-> Some MCUs let you power off Flash and run from RAM  
+-> Saves significant power  
+
+// GCC attribute to place function in RAM:  
+__attribute__((section(".ramfunc")))  
+void flash_erase_page(uint32_t address) {  
+&emsp;// This code runs from SRAM  
+&emsp;// Safe to erase Flash here  
+&emsp;FLASH->CR |= FLASH_CR_PER;  
+&emsp;FLASH->AR = address;  
+&emsp;FLASH->CR |= FLASH_CR_STRT;  
+&emsp;while (FLASH->SR & FLASH_SR_BSY);  
+}  
+
+The linker script places ".ramfunc" with LMA in Flash and VMA in SRAM, so startup code copies it to SRAM, just like ".data".  
+
+
+## Complete Memory Picture at Runtime  
+
+FLASH (0x08000000)-----------------------SRAM (0x20000000)  
+
+|--------------------|<----------->|------------------------|  
+|----Vector-Table----|<----------->|------.data-------------|<-globals:counter=100  
+|-(SP-init,handlers)-|<----copy----|---(runtime--values)----|  
+|--------------------|-------------|------------------------|  
+|----.text-----------|-------------|------.bss--------------|<-uninitialized:all 0  
+|--(all-your-code)---|<---zero-----|----(zeroed)------------|  
+|--------------------|<----------->|------------------------|  
+|----.rodata---------|<----------->|----Heap----------------|<-malloc()-space  
+|--(const,strings)---|<----------->|-----^------------------|  
+|--------------------|<----------->|-----|-grows-up---------|  
+|--.data-INIT-VALUES-|<----------->|-----[free-space]-------|  
+|---(init-backup)----|<----------->|------------------------|  
+|--------------------|<----------->|-----|------------------|  
+|--.ramfunc(if-any)--|<-----copy---|-----V-grows down-------|  
+|--------------------|<----------->|---Stack----------------|<-local vars,calls  
+|--------------------|<----------->|------------------------|  
+
+

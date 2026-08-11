@@ -149,6 +149,7 @@ Baud = PeripheralClock / (16 * Divider)
 Why 16??  
 Because of "Oversampling"(will discuss this in further modules)  
 
+
 Ex:- 16 MHz MCU @ 9600 baud  
 
 Divider = 16000000 / (16*9600)  
@@ -187,12 +188,48 @@ Error = ~ (-3.5%)
 
 This is beyond safe limit.  
 That's why,  
-- 115200 works on same MCU's  
+- 115200 works on some MCU's  
 - fails on others  
 
 IMPORTANT:- Real engineers always check baud errors tables.  
 
+### Oversampling, The secret sauce  
 
+Previously we discussed about receiver samples middle of bit.  
+But how does it know exact middle?  
+Oversampling  
+UART samples RX pin 16 times per bit.  
 
+16 samples -> decide bit value  
+This allows:-  
 
+- Noise filtering  
+- Better timing accuracy  
+- Clock mismatch tolerance  
+
+Instead of guessing, UART uses majority voting  
+
+### Why Divider uses 16 (Now it makes sense)  
+
+Because UART clock runs 16x faster than baud  
+Example 9600 baud:  
+
+9600x16 = 153600 samples/sec  
+Receiver counts 16 ticks -> 1 bit time  
+Then samples centre.  
+
+### When Baud Rate Work Best  
+
+UART works best when:-  
+Peripheral clock is multiple of (baud)x(16)  
+Good clock frequencies:-  
+
+7.3728 MHz  
+14.7456 MHz  
+18.432 MHz  
+
+Why?  
+
+7.3728/(16)x(9600) = 48 exactly  
+That's why old PC's used weird crystal frequencies.  
 
